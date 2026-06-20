@@ -83,13 +83,20 @@ winget install Gyan.FFmpeg
 ```
 
 **Діаризація** (розрізнення спікерів) додатково потребує токена HuggingFace і
-прийнятої ліцензії `pyannote/speaker-diarization-community-1`:
+прийнятої ліцензії [`pyannote/speaker-diarization-community-1`](https://huggingface.co/pyannote/speaker-diarization-community-1).
+Отримати токен: https://huggingface.co/settings/tokens
 
 ```powershell
+# Варіант 1: файл .env у корені проєкту (рекомендовано)
+copy .env.example .env
+# відкрити .env і вставити токен
+
+# Варіант 2: змінна середовища ОС
 [Environment]::SetEnvironmentVariable("HF_TOKEN", "hf_...", "User")
 ```
 
-Без `HF_TOKEN` ASR працює, але без міток спікерів.
+`.env` у `.gitignore` — токен ніколи не потрапить у git. Без `HF_TOKEN` ASR
+працює, але без міток спікерів.
 
 ---
 
