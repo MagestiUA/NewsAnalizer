@@ -19,6 +19,21 @@ from pathlib import Path
 from . import config
 
 
+def _silence_noise() -> None:
+    """Глушить нешкідливий шум ML-стеку (torchcodec, Lightning, TF32, INFO-логи).
+    Викликати ДО імпорту whisperx/pyannote/huggingface."""
+    import logging
+    import warnings
+
+    os.environ.setdefault("HF_HUB_DISABLE_SYMLINKS_WARNING", "1")
+    os.environ.setdefault("TRANSFORMERS_NO_ADVISORY_WARNINGS", "1")
+    warnings.filterwarnings("ignore")
+    # Глобально гасимо INFO/DEBUG: setLevel на іменованих логерах whisperx
+    # перебиває при імпорті, а logging.disable() — ні. Наші повідомлення йдуть
+    # через print(), тож не зникнуть.
+    logging.disable(logging.INFO)
+
+
 def _download_audio(video_id: str, dst_dir: Path) -> Path:
     import yt_dlp
 
@@ -71,6 +86,7 @@ def _join_diarized(segments) -> str:
 def transcribe(video_id: str, diarize: bool | None = None) -> str:
     """Розпізнає мовлення відео в текст. Якщо diarize (та є HF_TOKEN) — з мітками
     спікерів. diarize=None → авто: вмикаємо, коли токен присутній."""
+    _silence_noise()
     import whisperx
 
     hf_token = os.environ.get("HF_TOKEN")
