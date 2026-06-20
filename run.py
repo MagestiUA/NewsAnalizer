@@ -30,8 +30,8 @@ def parse_urls(raw: str) -> list[str]:
     return urls
 
 
-def process_one(url: str, client: OllamaClient, force_asr: bool) -> str:
-    """Обробити одне відео. Повертає шлях до звіту (рядок)."""
+def _fetch(url: str, force_asr: bool):
+    """Метадані + транскрипт одного відео. Повертає (meta, text)."""
     meta = metadata.fetch_metadata(url)
     print(f"  {meta.channel} · {meta.upload_date} · {meta.duration_min} хв · "
           f"розділів: {len(meta.chapters)}")
@@ -39,8 +39,7 @@ def process_one(url: str, client: OllamaClient, force_asr: bool) -> str:
     text = transcript.get_transcript(meta.video_id, meta.chapters,
                                      force_asr=force_asr)
     print(f"  транскрипт: {len(text)} символів")
-    out_path = analyze.analyze(meta, text, client=client)
-    return str(out_path)
+    return meta, text
 
 
 def main(raw: str, force_asr: bool) -> None:
@@ -50,21 +49,40 @@ def main(raw: str, force_asr: bool) -> None:
         return
 
     src_label = "розпізнавання аудіо (WhisperX)" if force_asr else "субтитри"
-    print(f"Батч: {len(urls)} відео. Джерело тексту: {src_label}.\n")
-    client = OllamaClient()                # один старт Ollama на весь батч
+    print(f"Батч: {len(urls)} відео. Джерело тексту: {src_label}.")
     ok: list[str] = []
     failed: list[tuple[str, str]] = []
-    try:
-        for i, url in enumerate(urls, 1):
-            print(f"━━━ [{i}/{len(urls)}] {url}")
-            try:
-                ok.append(process_one(url, client, force_asr))
-            except Exception as exc:
-                print(f"  [!] ПОМИЛКА: {exc}")
-                failed.append((url, str(exc)))
-            print()
-    finally:
-        client.shutdown()
+
+    # ── Фаза 1: транскрипти ──────────────────────────────────────────────────
+    # WhisperX крутиться ізольовано; Ollama НЕ чіпаємо, щоб gemma не висіла у
+    # VRAM під час розпізнавання (інакше whisper+gemma конкурують за пам'ять).
+    print(f"\n[Фаза 1/2] Транскрипти ({len(urls)})...")
+    jobs: list[tuple] = []
+    for i, url in enumerate(urls, 1):
+        print(f"━━━ [{i}/{len(urls)}] {url}")
+        try:
+            jobs.append(_fetch(url, force_asr))
+        except Exception as exc:
+            print(f"  [!] ПОМИЛКА транскрипту: {exc}")
+            failed.append((url, str(exc)))
+        print()
+
+    # ── Фаза 2: аналіз ───────────────────────────────────────────────────────
+    # WhisperX уже завершив роботу й звільнив VRAM → gemma бере всю пам'ять сама.
+    if jobs:
+        print(f"[Фаза 2/2] Аналіз LLM ({len(jobs)})...")
+        client = OllamaClient()
+        try:
+            for i, (meta, text) in enumerate(jobs, 1):
+                print(f"━━━ [{i}/{len(jobs)}] {meta.title}")
+                try:
+                    ok.append(str(analyze.analyze(meta, text, client=client)))
+                except Exception as exc:
+                    print(f"  [!] ПОМИЛКА аналізу: {exc}")
+                    failed.append((meta.video_id, str(exc)))
+                print()
+        finally:
+            client.shutdown()
 
     print("═" * 60)
     print(f"Готово: {len(ok)} успішно, {len(failed)} з помилкою.")
