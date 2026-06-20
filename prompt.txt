@@ -45,11 +45,16 @@ OUTPUT FORMAT (omit empty sections):
         if there is no Q&A block.
 
 CONTENT TYPE — adapt the output to what the broadcast actually is:
-- NEWS ROUNDUP / briefing (many separate events) → use the [SECTION] grid above.
+- NEWS ROUNDUP / briefing (many separate events OR several distinct topics) →
+  use the [SECTION] grid above. DEFAULT to this when the broadcast touches more
+  than one subject (e.g. Poland AND Belarus AND КНДР AND army reform), even if
+  one topic dominates — the grid captures the secondary topics that [ТЕЗИ] drops.
 - DEEP DIVE / analytical review of ONE subject (a weapon system and its use,
-  a strategy, a single event, an expert's argument) → the section grid usually
-  does NOT fit. Then your MAIN TASK is to extract the KEY THESES and WHO stated
-  them. Output under a single section:
+  a strategy, a single event, an expert's argument) → use [ТЕЗИ] ONLY when the
+  WHOLE broadcast is genuinely about that single subject. If you find yourself
+  dropping concrete facts because they are "off the main topic" — that means it
+  is multi-topic: switch to the [SECTION] grid instead.
+  Then your MAIN TASK is to extract the KEY THESES and WHO stated them. Output:
   [ТЕЗИ] one thesis per point. EVERY point MUST end with attribution in brackets:
          who said it — [Мілов], [ведучий], [експерт N], [офіційно], [Z-канали].
          If a speaker is named, use the name. Preserve numbers and direct claims.
@@ -73,7 +78,15 @@ CONTENT TYPE — adapt the output to what the broadcast actually is:
   ("зросла до X% з попередніх Y%", NOT just "зросла до X%"). For ratios keep both
   numbers ("15 з 34", NOT "15").
 
-  PRIORITY EXTRACT: legislative changes, new laws, institutional power shifts — always extract even if brief.
+  PRIORITY EXTRACT — ALWAYS extract these, even if brief or buried inside a longer
+  analytical/legal digression (do NOT drop them as "commentary"):
+    - legislative changes, new laws, institutional power shifts
+    - involvement of THIRD-COUNTRY forces (КНДР, Іран тощо): troops, drone
+      operators, equipment, instructors — keep WHAT they do and the cited source
+      ("за даними розвідки оператори дронів КНДР атакують українські міста")
+    - any concrete sourced fact (numbers, named units, intelligence data) even if
+      it sits inside a discussion of something abstract (e.g. a legal argument).
+      Pull the FACT out; drop only the abstract reasoning around it.
 
 RULES:
 - Default 2 sentences per point; use up to 4 WHEN the cause/mechanism/scale or
@@ -104,6 +117,13 @@ RULES:
   — theses, opinions, context, cited sources are all welcome; only
   ad/promo/repetition/filler must go. Completeness of MEANING beats any length cap.
 - Say each point ONCE. More content is good; restating the same idea is not.
+- COVERAGE CHECK (do this before finishing): mentally scan the WHOLE transcript
+  end to end for distinct topics. A long briefing usually covers SEVERAL — do not
+  collapse it to only the dominant one. For each topic with concrete facts, make
+  sure at least one point survives. Specifically re-check: third-country forces
+  (КНДР/Іран), strikes both directions, economic figures, personnel/legal changes,
+  any "за даними розвідки/ГШ" claim. If you extracted a topic into none of the
+  sections, you compressed too hard — add it back.
 - Language: Ukrainian
 
 FILENAME — the VERY FIRST line of your response must be a single line:
