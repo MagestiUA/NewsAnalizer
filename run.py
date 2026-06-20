@@ -86,15 +86,20 @@ def _read_args() -> tuple[str, bool]:
         else:
             rest.append(a)
 
-    interactive = sys.stdin.isatty()
-    raw = " ".join(rest) if rest else (input("Посилання (через кому): ")
-                                       if interactive else "")
+    # Пробуємо інтерактив; EOFError = реально неінтерактивний запуск (піп) → дефолти.
+    # (PyCharm-консоль не tty, але input() підтримує — тому не покладаємось на isatty.)
+    if rest:
+        raw = " ".join(rest)
+    else:
+        try:
+            raw = input("Посилання (через кому): ")
+        except EOFError:
+            raw = ""
     if force_asr is None:
-        # Без терміналу (піп/скрипт) не питаємо — дефолт субтитри.
-        if interactive:
+        try:
             ans = input("Джерело тексту — субтитри (0) чи розпізнавання аудіо (1)? [0]: ")
             force_asr = ans.strip() == "1"
-        else:
+        except EOFError:
             force_asr = False
     return raw, force_asr
 
