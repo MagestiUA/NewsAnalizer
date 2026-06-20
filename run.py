@@ -1,9 +1,10 @@
 """NewsAnalizer — аналіз новинних відео з YouTube (батч-режим).
 
 Запуск:
-    python run.py                          # спитає посилання
-    python run.py "url1, url2, url3"        # одразу з аргументу
-    python run.py url1 url2 url3            # або кількома аргументами
+    python run.py                          # спитає посилання й джерело тексту
+    python run.py "url1, url2, url3"        # одразу з аргументу (спитає джерело)
+    python run.py --asr  "url1, url2"       # примусове розпізнавання аудіо
+    python run.py --subs "url1, url2"       # тільки субтитри (дефолт)
 
 Посилання розділяються комами / пробілами / новими рядками.
 Помилка на одному відео не зупиняє решту.
@@ -29,25 +30,27 @@ def parse_urls(raw: str) -> list[str]:
     return urls
 
 
-def process_one(url: str, client: OllamaClient) -> str:
+def process_one(url: str, client: OllamaClient, force_asr: bool) -> str:
     """Обробити одне відео. Повертає шлях до звіту (рядок)."""
     meta = metadata.fetch_metadata(url)
     print(f"  {meta.channel} · {meta.upload_date} · {meta.duration_min} хв · "
           f"розділів: {len(meta.chapters)}")
     print(f"  {meta.title}")
-    text = transcript.get_transcript(meta.video_id, meta.chapters)
+    text = transcript.get_transcript(meta.video_id, meta.chapters,
+                                     force_asr=force_asr)
     print(f"  транскрипт: {len(text)} символів")
     out_path = analyze.analyze(meta, text, client=client)
     return str(out_path)
 
 
-def main(raw: str) -> None:
+def main(raw: str, force_asr: bool) -> None:
     urls = parse_urls(raw)
     if not urls:
         print("Не знайдено жодного посилання.")
         return
 
-    print(f"Батч: {len(urls)} відео.\n")
+    src_label = "розпізнавання аудіо (WhisperX)" if force_asr else "субтитри"
+    print(f"Батч: {len(urls)} відео. Джерело тексту: {src_label}.\n")
     client = OllamaClient()                # один старт Ollama на весь батч
     ok: list[str] = []
     failed: list[tuple[str, str]] = []
@@ -55,7 +58,7 @@ def main(raw: str) -> None:
         for i, url in enumerate(urls, 1):
             print(f"━━━ [{i}/{len(urls)}] {url}")
             try:
-                ok.append(process_one(url, client))
+                ok.append(process_one(url, client, force_asr))
             except Exception as exc:
                 print(f"  [!] ПОМИЛКА: {exc}")
                 failed.append((url, str(exc)))
@@ -71,6 +74,25 @@ def main(raw: str) -> None:
         print(f"  ✗ {url} — {err}")
 
 
+def _read_args() -> tuple[str, bool]:
+    """Розбирає argv: прапорці --asr/--subs + посилання. Доповнює інтерактивно."""
+    force_asr: bool | None = None
+    rest: list[str] = []
+    for a in sys.argv[1:]:
+        if a in ("--asr", "-a"):
+            force_asr = True
+        elif a in ("--subs", "-s"):
+            force_asr = False
+        else:
+            rest.append(a)
+
+    raw = " ".join(rest) if rest else input("Посилання (через кому): ")
+    if force_asr is None:
+        ans = input("Джерело тексту — субтитри (0) чи розпізнавання аудіо (1)? [0]: ")
+        force_asr = ans.strip() == "1"
+    return raw, force_asr
+
+
 if __name__ == "__main__":
-    arg = " ".join(sys.argv[1:]) if len(sys.argv) > 1 else input("Посилання (через кому): ")
-    main(arg)
+    raw, force_asr = _read_args()
+    main(raw, force_asr)

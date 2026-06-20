@@ -132,21 +132,33 @@ def _build_text(snippets: list[Snippet], chapters: list[dict] | None) -> str:
 
 # ─── Публічний API ─────────────────────────────────────────────────────────────
 def get_transcript(video_id: str, chapters: list[dict] | None = None,
-                   use_cache: bool = True) -> str:
-    """Текстова версія з розмітками розділів. Кеш: cache/<video_id>.txt."""
+                   use_cache: bool = True, force_asr: bool = False) -> str:
+    """Текстова версія. Кеш роздільний: cache/<id>.txt (субтитри) і
+    cache/<id>.asr.txt (розпізнавання аудіо).
+
+    force_asr=True — ігнорувати субтитри й одразу розпізнавати аудіо (WhisperX
+    + діаризація). Корисно для діалогів: мітки [Спікер N] інформативніші за
+    «голі» субтитри без розмітки спікерів.
+    """
     config.CACHE_DIR.mkdir(exist_ok=True)
-    cache_file = config.CACHE_DIR / f"{video_id}.txt"
+    cache_file = config.CACHE_DIR / (f"{video_id}.asr.txt" if force_asr
+                                     else f"{video_id}.txt")
     if use_cache and cache_file.exists():
         return cache_file.read_text(encoding="utf-8")
 
-    snippets = _snippets_via_api(video_id) or _snippets_via_ytdlp(video_id)
-    if snippets:
-        text = _build_text(snippets, chapters)
-    else:
-        # Субтитрів немає взагалі (напр. запис прямого ефіру) → ASR-резерв.
-        print("      [i] Субтитрів немає — резерв WhisperX (розпізнавання мовлення)...")
+    if force_asr:
+        print("      [i] Примусове розпізнавання аудіо (WhisperX)...")
         from . import asr
-        text = asr.transcribe(video_id)   # суцільний текст без таймкодів
+        text = asr.transcribe(video_id)
+    else:
+        snippets = _snippets_via_api(video_id) or _snippets_via_ytdlp(video_id)
+        if snippets:
+            text = _build_text(snippets, chapters)
+        else:
+            # Субтитрів немає взагалі (напр. запис прямого ефіру) → ASR-резерв.
+            print("      [i] Субтитрів немає — резерв WhisperX (розпізнавання мовлення)...")
+            from . import asr
+            text = asr.transcribe(video_id)
 
     cache_file.write_text(text, encoding="utf-8")
     return text
