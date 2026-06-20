@@ -11,9 +11,14 @@ from pathlib import Path
 
 # ─── Шляхи ─────────────────────────────────────────────────────────────────────
 ROOT       = Path(__file__).resolve().parent.parent
-PROMPT_FILE = ROOT / "prompt.txt"
 OUTPUT_DIR  = ROOT / "output"
 CACHE_DIR   = ROOT / "cache"
+
+# Промпти: класифікатор обирає формат, далі відповідний промпт.
+PROMPT_CLASSIFY         = ROOT / "prompt_classify.txt"
+PROMPT_ROUNDUP          = ROOT / "prompt_roundup.txt"          # рубрики, без атрибуції
+PROMPT_ANALYSIS_EXTRACT = ROOT / "prompt_analysis_extract.txt"  # плоский список
+PROMPT_ANALYSIS_SORT    = ROOT / "prompt_analysis_sort.txt"     # сортування списку
 
 # ─── Ollama / модель ─────────────────────────────────────────────────────────
 HOST          = "http://localhost:11434"
@@ -41,6 +46,6 @@ WHISPER_COMPUTE = "float16"   # "int8" для CPU / економії VRAM
 WHISPER_LANG    = None        # None = автовизначення мови (uk/ru)
 
 
-def load_prompt() -> str:
-    """Системний промпт аналітика з prompt.txt (редагується без коду)."""
-    return PROMPT_FILE.read_text(encoding="utf-8").strip()
+def load(path) -> str:
+    """Текст промпт-файлу (редагується без коду)."""
+    return path.read_text(encoding="utf-8").strip()

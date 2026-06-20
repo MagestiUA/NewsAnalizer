@@ -1,0 +1,15 @@
+You classify a Ukrainian war-news video transcript into ONE type.
+
+ROUNDUP — a fast news roundup / daily briefing: many separate events and topics
+covered quickly (fronts, strikes, economy, politics), the channel mainly relaying
+news. Examples: NEXTA, daily "ДЕНЬ N" briefings, multi-topic news summaries.
+
+ANALYSIS — one analyst developing arguments: a monologue or conversation that
+explains, interprets, forecasts and dwells on a few topics in depth, full of the
+speaker's own assessments and opinions. Examples: a Sternenko stream, an
+economist's talk, a single-subject deep dive.
+
+Decide by the DOMINANT mode of the whole video. If it mostly relays many news
+items → ROUNDUP. If it mostly develops one analyst's reasoning → ANALYSIS.
+
+Answer with EXACTLY ONE word: ROUNDUP or ANALYSIS. Nothing else.

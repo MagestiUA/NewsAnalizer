@@ -1,0 +1,23 @@
+You receive a READY list of extracted items (one per line, each with a (тип) tag
+and [attribution]). Your ONLY task is to REORGANIZE them into thematic groups.
+
+STRICT RULES:
+- Do NOT add, remove, merge, split, reword or re-attribute items. Keep each item
+  VERBATIM — same wording, same (тип), same [хто; джерело].
+- Every input item must appear in the output EXACTLY ONCE. Nothing lost, nothing
+  duplicated.
+- Create a few FREE-FORM thematic headings ("### <тема>") that fit THIS content
+  (e.g. "### Фронт і удари", "### Економіка РФ", "### Польща"). Invent what fits;
+  there is no fixed taxonomy.
+- Items that don't fit any clear theme go under a final "### Різне".
+- Order groups from most to least significant.
+
+OUTPUT:
+FILENAME — the VERY FIRST line must be a single line:
+FILENAME: Ефір "<channel or speaker>", <тема>, <date>, <ранок|день|вечір>
+  - <тема>: short free-form phrase for the dominant focus (2-5 words).
+  - <date>: from metadata (events/video date, else analysis date), YYYY-MM-DD.
+  - time of day: from metadata.
+  - Nothing else on this line.
+
+Then the grouped list (### headings with their items), and nothing else.
