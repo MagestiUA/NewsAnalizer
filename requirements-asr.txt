@@ -1,0 +1,10 @@
+# ASR-резерв (WhisperX) — потрібен ЛИШЕ для відео без субтитрів (записи прямих
+# ефірів тощо). Базовий субтитровий шлях працює без цього стеку.
+#
+# Спершу torch під свою відеокарту (приклад cu128 / RTX 40xx-50xx):
+#   .venv\Scripts\python.exe -m pip install torch==2.8.0 torchaudio==2.8.0 \
+#       --index-url https://download.pytorch.org/whl/cu128
+# Потім:
+#   .venv\Scripts\python.exe -m pip install -r requirements-asr.txt
+
+whisperx==3.8.6

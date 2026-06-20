@@ -32,6 +32,14 @@ TOP_K         = 40
 # Запас часу на відповідь моделі (велике відео + роздуми gemma)
 REQUEST_TIMEOUT = 1800
 
+# ─── ASR-резерв (WhisperX) — коли субтитрів немає взагалі ─────────────────────
+# Вмикається лише як фолбек у transcript.py. Таймкоди/діаризація не потрібні —
+# беремо лише текст. Версії під RTX (cu128): torch 2.8.0, whisperx 3.8.6.
+WHISPER_MODEL   = "large-v3"
+WHISPER_DEVICE  = "cuda"      # "cpu" якщо немає GPU (буде дуже повільно)
+WHISPER_COMPUTE = "float16"   # "int8" для CPU / економії VRAM
+WHISPER_LANG    = None        # None = автовизначення мови (uk/ru)
+
 
 def load_prompt() -> str:
     """Системний промпт аналітика з prompt.txt (редагується без коду)."""

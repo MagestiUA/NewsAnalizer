@@ -37,6 +37,12 @@ OUTPUT FORMAT (omit empty sections):
 [ВНУТРІШНЯ РФ] political signals, internal tensions
 [УКРАЇНА] reforms, military decisions
 [ДИПЛОМАТІЯ] international developments
+[ПИТАННЯ-ВІДПОВІДІ] include ONLY if the video has a Q&A block (viewer questions
+        or questions from others present on air). For each: short question, then
+        short answer, plus who answered. Format:
+          Q: <питання стисло> — A: <відповідь стисло> [хто відповів]
+        Keep the substance, drop chit-chat/greetings. Skip this section entirely
+        if there is no Q&A block.
 
 CONTENT TYPE — adapt the output to what the broadcast actually is:
 - NEWS ROUNDUP / briefing (many separate events) → use the [SECTION] grid above.

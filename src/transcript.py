@@ -140,11 +140,13 @@ def get_transcript(video_id: str, chapters: list[dict] | None = None,
         return cache_file.read_text(encoding="utf-8")
 
     snippets = _snippets_via_api(video_id) or _snippets_via_ytdlp(video_id)
-    if not snippets:
-        raise RuntimeError(
-            f"Не вдалося дістати субтитри для {video_id} "
-            "(ні transcript-api, ні yt-dlp). Можливо, субтитри вимкнені."
-        )
-    text = _build_text(snippets, chapters)
+    if snippets:
+        text = _build_text(snippets, chapters)
+    else:
+        # Субтитрів немає взагалі (напр. запис прямого ефіру) → ASR-резерв.
+        print("      [i] Субтитрів немає — резерв WhisperX (розпізнавання мовлення)...")
+        from . import asr
+        text = asr.transcribe(video_id)   # суцільний текст без таймкодів
+
     cache_file.write_text(text, encoding="utf-8")
     return text
