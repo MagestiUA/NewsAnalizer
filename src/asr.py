@@ -84,8 +84,42 @@ def _join_diarized(segments) -> str:
 
 
 def transcribe(video_id: str, diarize: bool | None = None) -> str:
-    """Розпізнає мовлення відео в текст. Якщо diarize (та є HF_TOKEN) — з мітками
-    спікерів. diarize=None → авто: вмикаємо, коли токен присутній."""
+    """Розпізнає мовлення відео в текст (через ОКРЕМИЙ процес).
+
+    WhisperX тримає у VRAM модель + CUDA-контекст torch (cuDNN/cuBLAS), які
+    PyTorch не повертає ОС до кінця процесу. Якби ASR крутився в основному
+    процесі, цей залишок не давав би Ollama завантажити gemma4 повністю у VRAM
+    (на 16 ГБ gemma ~15.6 ГБ не лишає місця) → зливання в CPU й гальма.
+
+    Тому ASR виконується в дочірньому процесі: коли він завершується, ОС
+    повертає ВСЮ його VRAM до того, як основний процес покличе gemma.
+    """
+    import subprocess
+    import sys
+
+    with tempfile.TemporaryDirectory() as tmp:
+        out_file = Path(tmp) / "asr.txt"
+        cmd = [sys.executable, "-m", "src.asr", "--worker", video_id, str(out_file)]
+        if diarize is True:
+            cmd.append("--diarize")
+        elif diarize is False:
+            cmd.append("--no-diarize")
+        try:
+            subprocess.run(cmd, cwd=str(config.ROOT), check=True)
+        except subprocess.CalledProcessError as exc:
+            raise RuntimeError(
+                "ASR-процес завершився помилкою (перевір, що встановлено "
+                "requirements-asr.txt і torch під GPU). Деталі — у виводі вище."
+            ) from exc
+        text = out_file.read_text(encoding="utf-8") if out_file.exists() else ""
+
+    if not text:
+        raise RuntimeError("WhisperX повернув порожній текст")
+    return text
+
+
+def _transcribe_inproc(video_id: str, diarize: bool | None = None) -> str:
+    """Сама робота WhisperX (виконується в дочірньому процесі — див. transcribe)."""
     _silence_noise()
     import whisperx
 
@@ -150,3 +184,20 @@ def _diarize(whisperx, audio, result, lang: str, hf_token: str):
     diarize_segments = pipe(audio)
     result = whisperx.assign_word_speakers(diarize_segments, result)
     return result["segments"]
+
+
+if __name__ == "__main__":
+    # Worker-режим: python -m src.asr --worker <video_id> <out_file> [--diarize|--no-diarize]
+    import sys
+
+    argv = [a for a in sys.argv[1:] if a != "--worker"]
+    _diar: bool | None = None
+    if "--diarize" in argv:
+        _diar = True
+        argv.remove("--diarize")
+    elif "--no-diarize" in argv:
+        _diar = False
+        argv.remove("--no-diarize")
+    _video_id, _out = argv[0], argv[1]
+    _text = _transcribe_inproc(_video_id, _diar)
+    Path(_out).write_text(_text, encoding="utf-8")
