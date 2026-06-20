@@ -86,10 +86,16 @@ def _read_args() -> tuple[str, bool]:
         else:
             rest.append(a)
 
-    raw = " ".join(rest) if rest else input("Посилання (через кому): ")
+    interactive = sys.stdin.isatty()
+    raw = " ".join(rest) if rest else (input("Посилання (через кому): ")
+                                       if interactive else "")
     if force_asr is None:
-        ans = input("Джерело тексту — субтитри (0) чи розпізнавання аудіо (1)? [0]: ")
-        force_asr = ans.strip() == "1"
+        # Без терміналу (піп/скрипт) не питаємо — дефолт субтитри.
+        if interactive:
+            ans = input("Джерело тексту — субтитри (0) чи розпізнавання аудіо (1)? [0]: ")
+            force_asr = ans.strip() == "1"
+        else:
+            force_asr = False
     return raw, force_asr
 
 

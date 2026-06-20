@@ -84,15 +84,25 @@ RULES:
 - Direction of ANY attack/strike MUST be explicit as "хто > по кому" (use ">").
   Never leave a strike without a direction marker. Use "?" for an unknown side.
 - Source attribution: [Мілов] [ГШ ЗСУ] [Z-канали] [офіційно]
+- SOURCE CHAIN (CRITICAL) — keep the BASIS the speaker grounds a claim on, not
+  only the claim. If a fact is presented as resting on a source ("за даними
+  розвідки", "за словами Генштабу", "як повідомляє Reuters", "джерела в Кремлі",
+  "за оцінками західних чиновників") — that basis MUST stay inside the point.
+  It changes the weight of the claim (rumor vs intelligence data).
+    WRONG:   Оператори БПЛА з КНДР працюють у Курській та Бєлгородській обл.
+    RIGHT:   За даними української розвідки, оператори БПЛА з КНДР працюють у
+             Курській та Бєлгородській обл.
+  This is SEPARATE from who-said-it-on-air (the [tag] / speaker prefix): a point
+  can have BOTH — the on-air speaker AND the source they cite.
 - QUOTED SOURCES: if the speaker reads or quotes ANOTHER source (a post, another
   channel, an official), attribute to the ORIGINAL author exactly as named and
   mark it as a quote — e.g. [цит. Romanov Лайт]. Do NOT rename, merge or guess
   the source (do not turn "Romanov Лайт" into "Воєнкор Романов"). If the exact
   source name is unclear, use [цит. ?].
 - Mark unverified/single-source claims with [!]
-- Target output: ~30-50% of input length. Lean toward keeping MORE — theses,
-  opinions and context are welcome; only ad/promo/repetition/filler must go.
-  Completeness of MEANING beats hitting a length target.
+- Target output: ~35-55% of input length. Default to KEEPING a detail when unsure
+  — theses, opinions, context, cited sources are all welcome; only
+  ad/promo/repetition/filler must go. Completeness of MEANING beats any length cap.
 - Say each point ONCE. More content is good; restating the same idea is not.
 - Language: Ukrainian
 
